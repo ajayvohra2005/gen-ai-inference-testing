@@ -2,8 +2,6 @@
 
 This tutorial shows Gen AI inference server examples using [Deep Java Library (DJL) Large Model Inference (LMI) Server](https://docs.djl.ai/master/docs/serving/serving/docs/lmi/index.html), and [Triton Inference Server](https://github.com/triton-inference-server). 
 
-The DJL-LMI server supports *continuous batching* for higher throughput. The Triton Inference Server supports *dynamic batching*. The custom Python backed `execute` function supports model batch size greater than 1 for higher throughput (default is set to 4).
-
 ## Tutorial Steps
 
 ### Launch Deep Learning Ubuntu Desktop
