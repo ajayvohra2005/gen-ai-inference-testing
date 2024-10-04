@@ -1,12 +1,12 @@
-# AWS Neuron Inference Server Examples
+# Gen AI Inference Examples
 
-This tutorial shows [AWS Neuron](https://awsdocs-neuron.readthedocs-hosted.com/en/latest/containers/index.html) inference server examples using [Deep Java Library (DJL) Large Model Inference (LMI) Server](https://docs.djl.ai/master/docs/serving/serving/docs/lmi/index.html), and [Triton Inference Server](https://github.com/triton-inference-server). 
+This tutorial shows Gen AI inference server examples using [Deep Java Library (DJL) Large Model Inference (LMI) Server](https://docs.djl.ai/master/docs/serving/serving/docs/lmi/index.html), and [Triton Inference Server](https://github.com/triton-inference-server). 
 
 The DJL-LMI server supports *continuous batching* for higher throughput. The Triton Inference Server supports *dynamic batching*. The custom Python backed `execute` function supports model batch size greater than 1 for higher throughput (default is set to 4).
 
 ## Tutorial Steps
 
-### Launch AWS Neuron Ubuntu instance
+### Launch Deep Learning Ubuntu Desktop
 
 This tutorial assumes a `trn1.32xlarge` machine for Neuron examples, and a `g5.48xlarge` for CUDA examples. You may want to launch the [AWS Deep Learning Desktop](https://github.com/aws-samples/aws-deep-learning-ami-ubuntu-dcv-desktop) with required instance type for a fully configured AWS Neuron EC2 desktop.
 
@@ -50,7 +50,7 @@ To launch Triton Inference Server with a custom Python backend:
 
     ./compose-triton-vllm-neuronx.sh up
 
-On `trn1.32xlarge`, this starts 4 instances of Triton Inference Server, listening on ports 8000, 8010, 8020 and 8030. You may want to use an AWS Application Load Balancer in front of it if you want a single endpoint.
+On `trn1.32xlarge`, this starts 4 instances of Triton Inference Server, listening on ports 8000, 8010, 8020 and 8030. There is an nginx load balancer running on port 8080 in front of the Triton Server instances.
 
 To test:
 
@@ -76,7 +76,7 @@ To launch Triton Inference Server with a custom Python backend:
 
     ./compose-triton-djl-python-neuronx.sh up
 
-On `trn1.32xlarge`, this starts 4 instances of Triton Inference Server, listening on ports 8000, 8010, 8020 and 8030. You may want to use an AWS Application Load Balancer in front of it if you want a single endpoint.
+On `trn1.32xlarge`, this starts 4 instances of Triton Inference Server, listening on ports 8000, 8010, 8020 and 8030. There is an nginx load balancer running on port 8080 in front of the Triton Server instances.
 
 To test:
 
