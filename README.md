@@ -6,81 +6,71 @@ This tutorial shows Gen AI inference server examples using [Deep Java Library (D
 
 ### Launch Deep Learning Ubuntu Desktop
 
-This tutorial assumes a `trn1.32xlarge` machine for Neuron examples, and a `g5.48xlarge` for CUDA examples. You may want to launch the [AWS Deep Learning Desktop](https://github.com/aws-samples/aws-deep-learning-ami-ubuntu-dcv-desktop) with required instance type for a fully configured AWS Neuron EC2 desktop.
+This tutorial assumes a `trn1.32xlarge` machine for Neuron examples, and a `g5.48xlarge` for CUDA examples. You may want to launch the [AWS Deep Learning Desktop](https://github.com/aws-samples/aws-deep-learning-ami-ubuntu-dcv-desktop) with  `trn1.32xlarge` instance type for neuron, or `g5.48xlarge` for gpu.
 
+### Build containers
+
+To build the container for triton inference server with neuronx, execute this on `trn1.32xlarge` machine:
+
+    ./scripts/build-tritonserver-neuronx.sh
+
+To build the container for triton inference server with cuda and vLLM, execute this on gpu machine:
+
+    ./scripts/build-tritonserver-cuda-vllm.sh
+
+To build the container for triton inference server with cuda and TensorRT-LLM, execute this on gpu machine::
+
+    ./scripts/build-tritonserver-cuda-trtllm.sh
+    
 ### Download Hugging Face Model
 
 To download a Hugging Face model (e.g. `meta-llama/Meta-Llama-3-8B-Instruct`):
 
-    ./hf-snapshot.sh hf-model-id hf-token
+    ./scripts/hf-snapshot.sh hf-model-id hf-token
 
 The model is downloaded under `$HOME/snapshots`
 
-### Deep Java Library (DJL) Large Model Inference (LMI) Server
+### Deep Java Library (DJL) Serving Large Model Inference (LMI) Transformers Neuronx Engine
 
-To launch DJL LMI server:
+This test should be run on a `trn1.32xlarge instance`. To launch DJL Serving with LMI Transformers Neuronx engine:
 
-    ./compose-djl-lmi-transformers-neuronx.sh up
-
-This starts a single DJL-LMI server listening on host port 8000 that round-robins requests to 4 model instances running with the server.
+    ./djl-serving/transformers-neuronx/compose-djl-lmi-transformers-neuronx.sh up
 
 To test:
 
-    ./test-djl-lmi.sh
-    ./test-djl-lmi-concurrent.sh
+    ./djl-serving/tests/test-djl-lmi.sh
+    ./djl-serving/tests/test-djl-lmi-concurrent.sh
 
 To stop DJL LMI server:
 
-    ./compose-djl-lmi-transformers-neuronx.sh down
+    ./djl-serving/transformers-neuronx/compose-djl-lmi-transformers-neuronx.sh down
 
 ### Triton Inference Server with vLLM and Neuronx
 
-First we need to build the required docker image, and push it into ECR in your AWS region. To build and push the image:
+To launch Triton Inference Server with vLLM and Neuronx, execute this on `trn1.32xlarge`:
 
-    git clone \
-    https://github.com/aws-samples/amazon-eks-machine-learning-with-terraform-and-kubeflow.git
-    cd amazon-eks-machine-learning-with-terraform-and-kubeflow
-    ./containers/tritonserver-neuronx/build_tools/build_and_push.sh aws-region
-
-Next, set the URI of the image built above in the `IMAGE` variable in [compose-triton-vllm-neuronx.sh](./compose-triton-vllm-neuronx.sh). 
-
-To launch Triton Inference Server with a custom Python backend:
-
-    ./compose-triton-vllm-neuronx.sh up
-
-On `trn1.32xlarge`, this starts 4 instances of Triton Inference Server, listening on ports 8000, 8010, 8020 and 8030. There is an nginx load balancer running on port 8080 in front of the Triton Server instances.
+    ./triton-server/vllm/compose-triton-vllm-neuronx.sh up
 
 To test:
 
-    ./test-triton-vllm.sh
-    ./test-triton-vllm-concurrent.sh
+    ./triton-server/tests/test-triton-vllm.sh
+    ./triton-server/tests/test-triton-vllm-concurrent.sh
 
 To stop the server:
 
-    ./compose-triton-vllm-neuronx.sh down
+    ./triton-server/vllm/compose-triton-vllm-neuronx.sh down
 
-### Triton Inference Server with Deep Java Library Python Backend with Transformers Neuronx
+### Triton Inference Server with DJL-LMI Transformers Neuronx Engine
 
-First we need to build the required docker image, and push it into ECR in your AWS region. To build and push the image:
+To launch Triton Inference Server with DJL-LMI Transformers Neuronx engine:
 
-    git clone \
-    https://github.com/aws-samples/amazon-eks-machine-learning-with-terraform-and-kubeflow.git
-    cd amazon-eks-machine-learning-with-terraform-and-kubeflow
-    ./containers/tritonserver-neuronx/build_tools/build_and_push.sh aws-region
-
-Next, set the URI of the image built above in the `IMAGE` variable in [compose-triton-djl-python-neuronx.sh](./compose-triton-djl-python-neuronx.sh). 
-
-To launch Triton Inference Server with a custom Python backend:
-
-    ./compose-triton-djl-python-neuronx.sh up
-
-On `trn1.32xlarge`, this starts 4 instances of Triton Inference Server, listening on ports 8000, 8010, 8020 and 8030. There is an nginx load balancer running on port 8080 in front of the Triton Server instances.
+    ./triton-server/djl-lmi/compose-triton-djl-lmi-neuronx.sh up
 
 To test:
 
-    ./test-triton-djl-python.sh
-    ./test-triton-djl-python-concurrent.sh
+    ./triton-server/tests/test-triton-djl-lmi-neuronx.sh
+    ./triton-server/tests/test-triton-djl-lmi-neuronx-concurrent.sh
 
 To stop the server:
 
-    ./compose-triton-djl-python-neuronx.sh down
+    ./triton-server/djl-lmi/compose-triton-djl-lmi-neuronx.sh down
