@@ -2,6 +2,8 @@ services:
   server_0:
     image: ${IMAGE}
     command: ${COMMAND}
+    environment:
+      - HF_MODEL_ID=${HF_MODEL_ID}
     deploy:
       resources:
         reservations:
@@ -11,11 +13,7 @@ services:
               capabilities: [gpu]
     shm_size: 32Gb
     volumes:
-      - ${HOME}/scripts/triton:/scripts:ro
-      - ${HOME}/triton0:/triton:rw
+      - ${HOME}/scripts/djl-lmi:/scripts:ro
       - ${HOME}/snapshots:/snapshots:rw
-      - ${HOME}/cache:/cache:rw
     ports:
-      - "8080:8000"
-      - "8081:8001"
-      - "8082:8002"
+      - "8080:8080"

@@ -2,6 +2,8 @@ services:
   server_0:
     image: ${IMAGE}
     command: ${COMMAND}
+    environment:
+      - HF_MODEL_ID=${HF_MODEL_ID}
     devices:
      - /dev/neuron0:/dev/neuron0
      - /dev/neuron1:/dev/neuron1
@@ -22,7 +24,7 @@ services:
     shm_size: 32Gb
     volumes:
       - ${HOME}/scripts/djl-lmi:/scripts:ro
-      - ${HOME}/djl-lmi:/djl-lmi:rw
+      - ${HOME}/cache:/cache:rw
       - ${HOME}/snapshots:/snapshots:rw
     ports:
       - "8080:8080"

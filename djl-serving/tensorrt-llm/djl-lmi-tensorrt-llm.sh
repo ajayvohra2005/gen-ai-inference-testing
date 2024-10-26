@@ -1,18 +1,14 @@
 #!/bin/bash
 
-[ ! -d /djl-lmi ] && echo "/djl-lmi dir must exist" && exit 1
 [ ! -d /snapshots ] && echo "/snapshots dir must exist" && exit 1
 
-[ $# -ne 1 ] && echo "usage: $0 hf-model-id" && exit 1 
-
-MODEL_PATH=/snapshots/$1
+[  -z "$HF_MODEL_ID"  ] && echo "HF_MODEL_ID environment variable must exist" && exit 1
+MODEL_PATH=/snapshots/$HF_MODEL_ID
 [ ! -d $MODEL_PATH ] && echo "$MODEL_PATH not found" && exit 1
 
 cp -r $MODEL_PATH /tmp/model
-
-LOG_ROOT=/djl-lmi/logs
-CACHE_DIR=/djl-lmi/cache
-mkdir -p $CACHE_DIR
+unset HF_MODEL_ID
+unset MODEL_PATH
 
 cat > /opt/ml/model/serving.properties <<EOF
 option.model_id=/tmp/model
@@ -27,10 +23,8 @@ option.trust_remote_code=true
 
 EOF
 
-mkdir -p $LOG_ROOT
-OUTPUT_LOG="$LOG_ROOT/djl-lmi-server.log"
 /usr/local/bin/dockerd-entrypoint.sh \
-serve \
-2>&1 | tee $OUTPUT_LOG \
+serve  \
 && /bin/bash -c "trap : TERM INT; sleep infinity & wait"
+
 

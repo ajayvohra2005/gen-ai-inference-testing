@@ -1,15 +1,15 @@
 #!/bin/bash
 
-[ ! -d /djl-lmi ] && echo "/djl-lmi dir must exist" && exit 1
+[ ! -d /cache ] && echo "/cache dir must exist" && exit 1
 [ ! -d /snapshots ] && echo "/snapshots dir must exist" && exit 1
 
-[ $# -ne 1 ] && echo "usage: $0 hf-model-id" && exit 1 
-
-MODEL_PATH=/snapshots/$1
+[  -z "$HF_MODEL_ID"  ] && echo "HF_MODEL_ID environment variable must exist" && exit 1
+MODEL_PATH=/snapshots/$HF_MODEL_ID
 [ ! -d $MODEL_PATH ] && echo "$MODEL_PATH not found" && exit 1
 
-LOG_ROOT=/djl-lmi/logs
-CACHE_DIR=/djl-lmi/cache
+unset HF_MODEL_ID
+
+CACHE_DIR=/cache
 mkdir -p $CACHE_DIR
 
 cat > /opt/ml/model/serving.properties <<EOF
@@ -28,12 +28,8 @@ option.trust_remote_code=true
 
 EOF
 
-mkdir -p $LOG_ROOT
-OUTPUT_LOG="$LOG_ROOT/djl-lmi-server.log"
 export NEURON_CC_FLAGS="--model-type transformer"
 export NEURON_COMPILE_CACHE_URL="$CACHE_DIR"
-/usr/local/bin/dockerd-entrypoint.sh \
-serve \
-2>&1 | tee $OUTPUT_LOG \
+/usr/local/bin/dockerd-entrypoint.sh serve \
 && /bin/bash -c "trap : TERM INT; sleep infinity & wait"
 

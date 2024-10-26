@@ -1,16 +1,10 @@
 #!/bin/bash
 
-[ ! -d /triton ] && echo "/triton dir must exist" && exit 1
 [ ! -d /snapshots ] && echo "/snapshots dir must exist" && exit 1
 
-[ $# -ne 1 ] && echo "usage: $0 hf-model-id" && exit 1 
-
-HF_MODEL_ID=$1
+[  -z "$HF_MODEL_ID"  ] && echo "HF_MODEL_ID environment variable must exist" && exit 1
 MODEL_PATH=/snapshots/$HF_MODEL_ID
 [ ! -d $MODEL_PATH ] && echo "$MODEL_PATH not found" && exit 1
-
-LOG_ROOT=/triton/logs
-MODEL_REPO=/triton/model_repository
 
 cat > /tmp/config.pbtxt <<EOF
 backend: "vllm"
@@ -75,20 +69,13 @@ cat > /tmp/model.json <<EOF
 
 EOF
 
-mkdir -p $LOG_ROOT
-OUTPUT_LOG="$LOG_ROOT/triton_server.log"
-rm -rf $MODEL_REPO
+export MODEL_REPO=/opt/ml/model/model_repo
 mkdir -p $MODEL_REPO
 VERSION=1
 MODEL_NAME=llama3-8b-instruct
 mkdir -p $MODEL_REPO/$MODEL_NAME/$VERSION
 cp /tmp/model.json $MODEL_REPO/$MODEL_NAME/$VERSION/model.json
 cp /tmp/config.pbtxt $MODEL_REPO/$MODEL_NAME/config.pbtxt
-tritonserver \
---model-repository=${MODEL_REPO} \
---grpc-port=8001 \
---http-port=8000 \
---metrics-port=8002 \
---disable-auto-complete-config \
---log-file=$OUTPUT_LOG \
+export MODEL_SERVER_CORES=8
+/opt/program/serve \
 && /bin/bash -c "trap : TERM INT; sleep infinity & wait"
