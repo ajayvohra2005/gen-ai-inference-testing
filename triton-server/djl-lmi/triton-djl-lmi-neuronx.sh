@@ -354,7 +354,7 @@ EOF
 export MODEL_REPO=/opt/ml/model/model_repo
 mkdir -p $MODEL_REPO
 VERSION=1
-MODEL_NAME=llama3-8b-instruct
+MODEL_NAME=model
 mkdir -p $MODEL_REPO/$MODEL_NAME/$VERSION
 cp /tmp/model.py $MODEL_REPO/$MODEL_NAME/$VERSION/model.py
 cp /tmp/model.json $MODEL_REPO/$MODEL_NAME/$VERSION/model.json
