@@ -22,49 +22,98 @@ To build the container for triton inference server with cuda and TensorRT-LLM, e
 
     ./scripts/build-tritonserver-cuda-trtllm.sh
     
-### Download Hugging Face Model
 
-To download a Hugging Face model (e.g. `meta-llama/Meta-Llama-3-8B-Instruct`):
+### Deep Java Library (DJL) Serving with Large with Model Inference (LMI) Engines
 
-    ./scripts/hf-snapshot.sh hf-model-id hf-token
+#### TensorRT-LLM LMI Engine
 
-The model is downloaded under `$HOME/snapshots`
+This test should be run on a `g5.48xlarge` instance. To launch:
 
-### Deep Java Library (DJL) Serving Large Model Inference (LMI) Transformers Neuronx Engine
-
-This test should be run on a `trn1.32xlarge instance`. To launch DJL Serving with LMI Transformers Neuronx engine:
-
-    ./djl-serving/transformers-neuronx/compose-djl-lmi-transformers-neuronx.sh up
+    HF_TOKEN=your-token MODEL_ID=hf-model-id \
+        ./djl-serving/tensorrt-llm/compose-djl-lmi-tensorrt-llm.sh up
 
 To test:
 
     ./djl-serving/tests/test-djl-lmi.sh
     ./djl-serving/tests/test-djl-lmi-concurrent.sh
 
-To stop DJL LMI server:
+To stop:
+
+    ./djl-serving/tensorrt-llm/compose-djl-lmi-tensorrt-llm.sh down
+
+#### Transformers Neuronx LMI Engine
+
+This test should be run on a `trn1.32xlarge` instance. To launch:
+
+    HF_TOKEN=your-token MODEL_ID=hf-model-id \
+        ./djl-serving/transformers-neuronx/compose-djl-lmi-transformers-neuronx.sh up
+
+To test:
+
+    ./djl-serving/tests/test-djl-lmi.sh
+    ./djl-serving/tests/test-djl-lmi-concurrent.sh
+
+To stop:
 
     ./djl-serving/transformers-neuronx/compose-djl-lmi-transformers-neuronx.sh down
 
-### Triton Inference Server with vLLM and Neuronx
+### Triton Inference Server
 
-To launch Triton Inference Server with vLLM and Neuronx, execute this on `trn1.32xlarge`:
+#### TensorRT-LLM Backend
 
-    ./triton-server/vllm/compose-triton-vllm-neuronx.sh up
+To launch, execute this on `g5.48xlarge`:
+
+    HF_TOKEN=your-token MODEL_ID=hf-model-id \
+        ./triton-server/tensorrt-llm/compose-triton-tensorrt-llm.sh up
 
 To test:
 
     ./triton-server/tests/test-triton-vllm.sh
     ./triton-server/tests/test-triton-vllm-concurrent.sh
 
-To stop the server:
+To stop:
+
+    ./triton-server/tensorrt-llm/compose-triton-tensorrt-llm.sh down
+
+#### vLLM Backend on CUDA
+
+To launch, execute this on `g5.48xlarge`:
+
+    HF_TOKEN=your-token MODEL_ID=hf-model-id \
+        ./triton-server/vllm/compose-triton-vllm-cuda.sh up
+
+To test:
+
+    ./triton-server/tests/test-triton-vllm.sh
+    ./triton-server/tests/test-triton-vllm-concurrent.sh
+
+To stop:
+
+    ./triton-server/vllm/compose-triton-vllm-cuda.sh down
+
+#### vLLM Backend on Neuronx
+
+To launch Triton, execute this on `trn1.32xlarge`:
+
+    HF_TOKEN=your-token MODEL_ID=hf-model-id \
+        ./triton-server/vllm/compose-triton-vllm-neuronx.sh up
+
+To test:
+
+    ./triton-server/tests/test-triton-vllm.sh
+    ./triton-server/tests/test-triton-vllm-concurrent.sh
+
+To stop:
 
     ./triton-server/vllm/compose-triton-vllm-neuronx.sh down
 
-### Triton Inference Server with DJL-LMI Transformers Neuronx Engine
 
-To launch Triton Inference Server with DJL-LMI Transformers Neuronx engine:
+#### DJL-LMI Neuronx Backend
 
-    ./triton-server/djl-lmi/compose-triton-djl-lmi-neuronx.sh up
+To launch:
+
+    HF_TOKEN=your-token MODEL_ID=hf-model-id \
+        ./triton-server/djl-lmi/compose-triton-djl-lmi-neuronx.sh up
 
 To test:
 
