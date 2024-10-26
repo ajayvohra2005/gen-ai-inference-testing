@@ -3,9 +3,16 @@
 [ ! -d /snapshots ] && echo "/snapshots dir must exist" && exit 1
 [ ! -d /cache ] && echo "/cache dir must exist" && exit 1
 
-[  -z "$HF_MODEL_ID"  ] && echo "HF_MODEL_ID environment variable must exist" && exit 1
-MODEL_PATH=/snapshots/$HF_MODEL_ID
-[ ! -d $MODEL_PATH ] && echo "$MODEL_PATH not found" && exit 1
+[  -z "$MODEL_ID"  ] && echo "MODEL_ID environment variable must exist" && exit 1
+
+MODEL_PATH=/snapshots/$MODEL_ID
+if [ ! -d $MODEL_PATH ]
+then
+pip3 install -U "huggingface_hub[cli]"
+huggingface-cli download --repo-type model \
+    --local-dir $MODEL_PATH \
+    --token $HF_TOKEN  $MODEL_ID
+fi
 
 TP_SIZE=8
 PP_SIZE=1
@@ -25,8 +32,8 @@ examples/llama/convert_checkpoint.py \
 fi
 
 cd /opt/tensorrtllm_backend
-mkdir -p /cache/$HF_MODEL_ID
-ENGINE_DIR=/cache/$HF_MODEL_ID/trtllm_engine
+mkdir -p /cache/$MODEL_ID
+ENGINE_DIR=/cache/$MODEL_ID/trtllm_engine
 
 if [ ! -d $ENGINE_DIR ]
 then
@@ -52,7 +59,6 @@ fi
 
 MODEL_REPO=/opt/ml/model/model_repo
 mkdir -p $MODEL_REPO
-MODEL_NAME=llama3_8b_instruct
 
 echo "Build Triton TensorRT-LLM model"
 
@@ -63,6 +69,8 @@ MAX_BATCH_SIZE=8
 INSTANCE_COUNT=1
 MAX_QUEUE_DELAY_MS=100
 FILL_TEMPLATE_SCRIPT=tools/fill_template.py
+
+MODEL_NAME=model
 cp -r all_models/inflight_batcher_llm/preprocessing $MODEL_REPO/${MODEL_NAME}_preprocessing
 cp -r all_models/inflight_batcher_llm/postprocessing $MODEL_REPO/${MODEL_NAME}_postprocessing
 cp -r all_models/inflight_batcher_llm/tensorrt_llm_bls $MODEL_REPO/${MODEL_NAME}_tensorrt_llm_bls
@@ -73,12 +81,12 @@ python3 ${FILL_TEMPLATE_SCRIPT} -i ${MODEL_REPO}/${MODEL_NAME}_postprocessing/co
 python3 ${FILL_TEMPLATE_SCRIPT} -i ${MODEL_REPO}/${MODEL_NAME}_tensorrt_llm_bls/config.pbtxt triton_max_batch_size:${MAX_BATCH_SIZE},decoupled_mode:${DECOUPLED_MODE},bls_instance_count:${INSTANCE_COUNT},tensorrt_llm_model_name:${MODEL_NAME}_tensorrt_llm
 python3 ${FILL_TEMPLATE_SCRIPT} -i ${MODEL_REPO}/${MODEL_NAME}_ensemble/config.pbtxt triton_max_batch_size:${MAX_BATCH_SIZE}
 python3 ${FILL_TEMPLATE_SCRIPT} -i ${MODEL_REPO}/${MODEL_NAME}_tensorrt_llm/config.pbtxt triton_max_batch_size:${MAX_BATCH_SIZE},decoupled_mode:${DECOUPLED_MODE},engine_dir:${ENGINE_DIR},max_queue_delay_microseconds:${MAX_QUEUE_DELAY_MS},batching_strategy:inflight_fused_batching
-sed -i 's/name: "preprocessing"/name: "llama3_8b_instruct_preprocessing"/1' ${MODEL_REPO}/${MODEL_NAME}_preprocessing/config.pbtxt
-sed -i 's/name: "postprocessing"/name: "llama3_8b_instruct_postprocessing"/1' ${MODEL_REPO}/${MODEL_NAME}_postprocessing/config.pbtxt
-sed -i 's/name: "tensorrt_llm_bls"/name: "llama3_8b_instruct_tensorrt_llm_bls"/1' ${MODEL_REPO}/${MODEL_NAME}_tensorrt_llm_bls/config.pbtxt
-sed -i 's/name: "ensemble"/name: "llama3_8b_instruct_ensemble"/1' ${MODEL_REPO}/${MODEL_NAME}_ensemble/config.pbtxt
-sed -i 's/name: "tensorrt_llm"/name: "llama3_8b_instruct_tensorrt_llm"/1' ${MODEL_REPO}/${MODEL_NAME}_tensorrt_llm/config.pbtxt
-sed -i 's/model_name: "preprocessing"/model_name: "llama3_8b_instruct_preprocessing"/1' ${MODEL_REPO}/${MODEL_NAME}_ensemble/config.pbtxt
-sed -i 's/model_name: "postprocessing"/model_name: "llama3_8b_instruct_postprocessing"/1' ${MODEL_REPO}/${MODEL_NAME}_ensemble/config.pbtxt
-sed -i 's/model_name: "tensorrt_llm"/model_name: "llama3_8b_instruct_tensorrt_llm"/1' ${MODEL_REPO}/${MODEL_NAME}_ensemble/config.pbtxt
+sed -i 's/name: "preprocessing"/name: "model_preprocessing"/1' ${MODEL_REPO}/${MODEL_NAME}_preprocessing/config.pbtxt
+sed -i 's/name: "postprocessing"/name: "model_postprocessing"/1' ${MODEL_REPO}/${MODEL_NAME}_postprocessing/config.pbtxt
+sed -i 's/name: "tensorrt_llm_bls"/name: "model_tensorrt_llm_bls"/1' ${MODEL_REPO}/${MODEL_NAME}_tensorrt_llm_bls/config.pbtxt
+sed -i 's/name: "ensemble"/name: "model_ensemble"/1' ${MODEL_REPO}/${MODEL_NAME}_ensemble/config.pbtxt
+sed -i 's/name: "tensorrt_llm"/name: "model_tensorrt_llm"/1' ${MODEL_REPO}/${MODEL_NAME}_tensorrt_llm/config.pbtxt
+sed -i 's/model_name: "preprocessing"/model_name: "model_preprocessing"/1' ${MODEL_REPO}/${MODEL_NAME}_ensemble/config.pbtxt
+sed -i 's/model_name: "postprocessing"/model_name: "model_postprocessing"/1' ${MODEL_REPO}/${MODEL_NAME}_ensemble/config.pbtxt
+sed -i 's/model_name: "tensorrt_llm"/model_name: "model_tensorrt_llm"/1' ${MODEL_REPO}/${MODEL_NAME}_ensemble/config.pbtxt
 

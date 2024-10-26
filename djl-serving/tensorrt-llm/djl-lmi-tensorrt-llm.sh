@@ -1,17 +1,11 @@
 #!/bin/bash
 
 [ ! -d /snapshots ] && echo "/snapshots dir must exist" && exit 1
+[  -z "$MODEL_ID"  ] && echo "MODEL_ID environment variable must exist" && exit 1
 
-[  -z "$HF_MODEL_ID"  ] && echo "HF_MODEL_ID environment variable must exist" && exit 1
-MODEL_PATH=/snapshots/$HF_MODEL_ID
-[ ! -d $MODEL_PATH ] && echo "$MODEL_PATH not found" && exit 1
-
-cp -r $MODEL_PATH /tmp/model
-unset HF_MODEL_ID
-unset MODEL_PATH
 
 cat > /opt/ml/model/serving.properties <<EOF
-option.model_id=/tmp/model
+option.model_id=$MODEL_ID
 option.entryPoint=djl_python.tensorrt_llm
 option.tensor_parallel_degree=4
 option.max_num_tokens=8192

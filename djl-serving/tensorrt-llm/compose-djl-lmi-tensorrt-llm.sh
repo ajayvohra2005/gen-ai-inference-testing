@@ -7,7 +7,7 @@ DIR=$scripts_dir/..
 
 export IMAGE="deepjavalibrary/djl-serving:0.29.0-tensorrt-llm"
 export COMMAND="/scripts/djl-lmi-tensorrt-llm.sh"
-export HF_MODEL_ID="meta-llama/Meta-Llama-3-8B-Instruct"
+export HF_HOME=/snapshots/huggingface
 
 if [ "$1" == "up" ]
 then

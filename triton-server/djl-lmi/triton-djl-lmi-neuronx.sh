@@ -3,9 +3,8 @@
 [ ! -d /cache ] && echo "/cache dir must exist" && exit 1
 [ ! -d /snapshots ] && echo "/snapshots dir must exist" && exit 1
 
-[  -z "$HF_MODEL_ID"  ] && echo "HF_MODEL_ID environment variable must exist" && exit 1
-MODEL_PATH=/snapshots/$HF_MODEL_ID
-[ ! -d $MODEL_PATH ] && echo "$MODEL_PATH not found" && exit 1
+[  -z "$MODEL_ID"  ] && echo "MODEL_ID environment variable must exist" && exit 1
+
 
 CACHE_DIR=/cache
 
@@ -337,7 +336,7 @@ EOF
 
 cat > /tmp/model.json <<EOF
 {
-  "model_id": "$MODEL_PATH",
+  "model_id": "$MODEL_ID",
   "tensor_parallel_degree": 8,
   "amp": "f16",
   "n_positions": 8192,

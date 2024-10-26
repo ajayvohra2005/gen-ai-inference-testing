@@ -3,7 +3,9 @@ services:
     image: ${IMAGE}
     command: ${COMMAND}
     environment:
-      - HF_MODEL_ID=${HF_MODEL_ID}
+      - MODEL_ID=${MODEL_ID}
+      - HF_HOME=/snapshots/huggingface
+      - HF_TOKEN=${HF_TOKEN}
     devices:
      - /dev/neuron0:/dev/neuron0
      - /dev/neuron1:/dev/neuron1

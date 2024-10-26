@@ -4,7 +4,7 @@
 [ $# -ne 1 ] && echo "usage: $0 <up/down>" && exit 1
 export IMAGE=docker.io/library/tritonserver-neuronx:latest
 export COMMAND="/scripts/triton-vllm-neuronx.sh"
-export HF_MODEL_ID="meta-llama/Meta-Llama-3-8B-Instruct"
+export HF_HOME=/snapshots/huggingface
 
 scripts_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 DIR=$scripts_dir/..

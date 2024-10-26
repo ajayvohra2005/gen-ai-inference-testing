@@ -4,7 +4,8 @@
 
 export IMAGE="deepjavalibrary/djl-serving:0.29.0-pytorch-inf2"
 export COMMAND="/scripts/djl-lmi-transformers-neuronx.sh"
-export HF_MODEL_ID="meta-llama/Meta-Llama-3-8B-Instruct"
+export HF_HOME=/snapshots/huggingface
+
 scripts_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 DIR=$scripts_dir/..
 

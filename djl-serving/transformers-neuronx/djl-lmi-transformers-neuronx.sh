@@ -3,17 +3,13 @@
 [ ! -d /cache ] && echo "/cache dir must exist" && exit 1
 [ ! -d /snapshots ] && echo "/snapshots dir must exist" && exit 1
 
-[  -z "$HF_MODEL_ID"  ] && echo "HF_MODEL_ID environment variable must exist" && exit 1
-MODEL_PATH=/snapshots/$HF_MODEL_ID
-[ ! -d $MODEL_PATH ] && echo "$MODEL_PATH not found" && exit 1
-
-unset HF_MODEL_ID
+[  -z "$MODEL_ID"  ] && echo "MODEL_ID environment variable must exist" && exit 1
 
 CACHE_DIR=/cache
 mkdir -p $CACHE_DIR
 
 cat > /opt/ml/model/serving.properties <<EOF
-option.model_id=$MODEL_PATH
+option.model_id=$MODEL_ID
 option.entryPoint=djl_python.transformers_neuronx
 option.tensor_parallel_degree=8
 option.amp=f16
