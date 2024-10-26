@@ -5,6 +5,15 @@
 
 [  -z "$MODEL_ID"  ] && echo "MODEL_ID environment variable must exist" && exit 1
 
+MODEL_PATH=/snapshots/$MODEL_ID
+if [ ! -d $MODEL_PATH ]
+then
+pip3 install -U "huggingface_hub[cli]"
+huggingface-cli download --repo-type model \
+    --local-dir $MODEL_PATH \
+    --token $HF_TOKEN  $MODEL_ID
+fi
+
 CACHE_DIR=/cache
 
 cat > /tmp/config.pbtxt <<EOF
@@ -58,7 +67,7 @@ EOF
 
 cat > /tmp/model.json <<EOF
 {
-  "model": "$MODEL_ID",
+  "model": "$MODEL_PATH",
   "disable_log_requests": true,
   "tensor_parallel_size": 8,
   "max_num_seqs": 4,
